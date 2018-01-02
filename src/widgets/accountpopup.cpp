@@ -206,13 +206,16 @@ void AccountPopupWidget::dpiMultiplierChanged(float /*oldDpi*/, float newDpi)
     this->setStyleSheet(QString("* { font-size: <font-size>px; }")
                             .replace("<font-size>", QString::number((int)(12 * newDpi))));
 
-    this->ui->lblAvatar->setFixedSize((int)(100 * newDpi), (int)(100 * newDpi));
+    this->ui->lblAvatar->setFixedSize((int)(200 * newDpi), (int)(200 * newDpi));
 }
 
 void AccountPopupWidget::updateButtons(QWidget *layout, bool state)
 {
     for (auto button : layout->findChildren<QPushButton *>()) {
         button->setVisible(state);
+    }
+    for (auto label : layout->findChildren<QLabel *>()) {
+        label->setVisible(state);
     }
 }
 
