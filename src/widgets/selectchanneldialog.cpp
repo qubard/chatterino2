@@ -33,70 +33,16 @@ SelectChannelDialog::SelectChannelDialog()
         util::LayoutCreator<QWidget> obj(new QWidget());
         auto vbox = obj.setLayoutType<QVBoxLayout>();
 
-        // channel_btn
-        auto channel_btn = vbox.emplace<QRadioButton>("Channel").assign(&this->ui.twitch.channel);
-        auto channel_lbl = vbox.emplace<QLabel>("Join a twitch channel by it's name.").hidden();
-        channel_lbl->setWordWrap(true);
-        auto channel_edit = vbox.emplace<QLineEdit>().hidden().assign(&this->ui.twitch.channelName);
+        vbox.emplace<QLabel>("Enter the channel name below");
+        auto lineEdit = vbox.emplace<QLineEdit>();
+        vbox.emplace<QLabel>("or join a special channel...");
 
-        QObject::connect(*channel_btn, &QRadioButton::toggled, [=](bool enabled) mutable {
-            if (enabled) {
-                channel_edit->setFocus();
-                channel_edit->setSelection(0, channel_edit->text().length());
-            }
-
-            channel_edit->setVisible(enabled);
-            channel_lbl->setVisible(enabled);
-        });
-
-        channel_btn->installEventFilter(&this->tabFilter);
-        channel_edit->installEventFilter(&this->tabFilter);
-
-        // whispers_btn
-        auto whispers_btn =
-            vbox.emplace<QRadioButton>("Whispers").assign(&this->ui.twitch.whispers);
-        auto whispers_lbl =
-            vbox.emplace<QLabel>("Shows the whispers that you receive while chatterino is running.")
-                .hidden();
-
-        whispers_lbl->setWordWrap(true);
-        whispers_btn->installEventFilter(&this->tabFilter);
-
-        QObject::connect(*whispers_btn, &QRadioButton::toggled,
-                         [=](bool enabled) mutable { whispers_lbl->setVisible(enabled); });
-
-        // mentions_btn
-        auto mentions_btn =
-            vbox.emplace<QRadioButton>("Mentions").assign(&this->ui.twitch.mentions);
-        auto mentions_lbl =
-            vbox.emplace<QLabel>("Shows all the messages that highlight you from any channel.")
-                .hidden();
-
-        mentions_lbl->setWordWrap(true);
-        mentions_btn->installEventFilter(&this->tabFilter);
-
-        QObject::connect(*mentions_btn, &QRadioButton::toggled,
-                         [=](bool enabled) mutable { mentions_lbl->setVisible(enabled); });
-
-        // watching_btn
-        auto watching_btn =
-            vbox.emplace<QRadioButton>("Watching").assign(&this->ui.twitch.watching);
-        auto watching_lbl =
-            vbox.emplace<QLabel>("Requires the chatterino browser extension.").hidden();
-
-        watching_lbl->setWordWrap(true);
-        watching_btn->installEventFilter(&this->tabFilter);
-
-        QObject::connect(*watching_btn, &QRadioButton::toggled,
-                         [=](bool enabled) mutable { watching_lbl->setVisible(enabled); });
-
-        vbox->addStretch(1);
-
-        // tabbing order
-        QWidget::setTabOrder(*channel_btn, *whispers_btn);
-        QWidget::setTabOrder(*whispers_btn, *mentions_btn);
-        QWidget::setTabOrder(*mentions_btn, *watching_btn);
-        QWidget::setTabOrder(*watching_btn, *channel_btn);
+        auto hbox = vbox.emplace<QHBoxLayout>();
+        {
+            hbox.emplace<QPushButton>("Whispers");
+            hbox.emplace<QPushButton>("Mentions");
+            hbox.emplace<QPushButton>("Watching");
+        }
 
         // tab
         NotebookTab *tab = notebook->addPage(obj.getElement());
@@ -147,29 +93,29 @@ void SelectChannelDialog::setSelectedChannel(IndirectChannel _channel)
 
     this->selectedChannel = channel;
 
-    switch (_channel.getType()) {
-        case Channel::Twitch: {
-            this->ui.notebook->selectIndex(TAB_TWITCH);
-            this->ui.twitch.channel->setFocus();
-            this->ui.twitch.channelName->setText(channel->name);
-        } break;
-        case Channel::TwitchWatching: {
-            this->ui.notebook->selectIndex(TAB_TWITCH);
-            this->ui.twitch.watching->setFocus();
-        } break;
-        case Channel::TwitchMentions: {
-            this->ui.notebook->selectIndex(TAB_TWITCH);
-            this->ui.twitch.mentions->setFocus();
-        } break;
-        case Channel::TwitchWhispers: {
-            this->ui.notebook->selectIndex(TAB_TWITCH);
-            this->ui.twitch.whispers->setFocus();
-        } break;
-        default: {
-            this->ui.notebook->selectIndex(TAB_TWITCH);
-            this->ui.twitch.channel->setFocus();
-        }
-    }
+    //    switch (_channel.getType()) {
+    //        case Channel::Twitch: {
+    //            this->ui.notebook->selectIndex(TAB_TWITCH);
+    //            this->ui.twitch.channel->setFocus();
+    //            this->ui.twitch.channelName->setText(channel->name);
+    //        } break;
+    //        case Channel::TwitchWatching: {
+    //            this->ui.notebook->selectIndex(TAB_TWITCH);
+    //            this->ui.twitch.watching->setFocus();
+    //        } break;
+    //        case Channel::TwitchMentions: {
+    //            this->ui.notebook->selectIndex(TAB_TWITCH);
+    //            this->ui.twitch.mentions->setFocus();
+    //        } break;
+    //        case Channel::TwitchWhispers: {
+    //            this->ui.notebook->selectIndex(TAB_TWITCH);
+    //            this->ui.twitch.whispers->setFocus();
+    //        } break;
+    //        default: {
+    //            this->ui.notebook->selectIndex(TAB_TWITCH);
+    //            this->ui.twitch.channel->setFocus();
+    //        }
+    //    }
 
     this->_hasSelectedChannel = false;
 }
@@ -182,19 +128,20 @@ IndirectChannel SelectChannelDialog::getSelectedChannel() const
 
     auto app = getApp();
 
-    switch (this->ui.notebook->getSelectedIndex()) {
-        case TAB_TWITCH: {
-            if (this->ui.twitch.channel->isChecked()) {
-                return app->twitch.server->getOrAddChannel(this->ui.twitch.channelName->text());
-            } else if (this->ui.twitch.watching->isChecked()) {
-                return app->twitch.server->watchingChannel;
-            } else if (this->ui.twitch.mentions->isChecked()) {
-                return app->twitch.server->mentionsChannel;
-            } else if (this->ui.twitch.whispers->isChecked()) {
-                return app->twitch.server->whispersChannel;
-            }
-        }
-    }
+    //    switch (this->ui.notebook->getSelectedIndex()) {
+    //        case TAB_TWITCH: {
+    //            if (this->ui.twitch.channel->isChecked()) {
+    //                return
+    //                app->twitch.server->getOrAddChannel(this->ui.twitch.channelName->text());
+    //            } else if (this->ui.twitch.watching->isChecked()) {
+    //                return app->twitch.server->watchingChannel;
+    //            } else if (this->ui.twitch.mentions->isChecked()) {
+    //                return app->twitch.server->mentionsChannel;
+    //            } else if (this->ui.twitch.whispers->isChecked()) {
+    //                return app->twitch.server->whispersChannel;
+    //            }
+    //        }
+    //    }
 
     return this->selectedChannel;
 }
@@ -206,55 +153,58 @@ bool SelectChannelDialog::hasSeletedChannel() const
 
 bool SelectChannelDialog::EventFilter::eventFilter(QObject *watched, QEvent *event)
 {
-    auto *widget = (QWidget *)watched;
+    //    auto *widget = (QWidget *)watched;
 
-    if (event->type() == QEvent::FocusIn) {
-        widget->grabKeyboard();
+    //    if (event->type() == QEvent::FocusIn) {
+    //        widget->grabKeyboard();
 
-        auto *radio = dynamic_cast<QRadioButton *>(watched);
-        if (radio) {
-            radio->setChecked(true);
-        }
+    //        auto *radio = dynamic_cast<QRadioButton *>(watched);
+    //        if (radio) {
+    //            radio->setChecked(true);
+    //        }
 
-        return true;
-    } else if (event->type() == QEvent::FocusOut) {
-        widget->releaseKeyboard();
-        return false;
-    } else if (event->type() == QEvent::KeyPress) {
-        QKeyEvent *event_key = static_cast<QKeyEvent *>(event);
-        if ((event_key->key() == Qt::Key_Tab || event_key->key() == Qt::Key_Down) &&
-            event_key->modifiers() == Qt::NoModifier) {
-            if (widget == this->dialog->ui.twitch.channelName) {
-                this->dialog->ui.twitch.whispers->setFocus();
-                return true;
-            } else {
-                widget->nextInFocusChain()->setFocus();
-            }
-            return true;
-        } else if (((event_key->key() == Qt::Key_Tab || event_key->key() == Qt::Key_Backtab) &&
-                    event_key->modifiers() == Qt::ShiftModifier) ||
-                   ((event_key->key() == Qt::Key_Up) && event_key->modifiers() == Qt::NoModifier)) {
-            if (widget == this->dialog->ui.twitch.channelName) {
-                this->dialog->ui.twitch.watching->setFocus();
-                return true;
-            } else if (widget == this->dialog->ui.twitch.whispers) {
-                this->dialog->ui.twitch.channel->setFocus();
-                return true;
-            }
+    //        return true;
+    //    } else if (event->type() == QEvent::FocusOut) {
+    //        widget->releaseKeyboard();
+    //        return false;
+    //    } else if (event->type() == QEvent::KeyPress) {
+    //        QKeyEvent *event_key = static_cast<QKeyEvent *>(event);
+    //        if ((event_key->key() == Qt::Key_Tab || event_key->key() == Qt::Key_Down) &&
+    //            event_key->modifiers() == Qt::NoModifier) {
+    //            if (widget == this->dialog->ui.twitch.channelName) {
+    //                this->dialog->ui.twitch.whispers->setFocus();
+    //                return true;
+    //            } else {
+    //                widget->nextInFocusChain()->setFocus();
+    //            }
+    //            return true;
+    //        } else if (((event_key->key() == Qt::Key_Tab || event_key->key() == Qt::Key_Backtab)
+    //        &&
+    //                    event_key->modifiers() == Qt::ShiftModifier) ||
+    //                   ((event_key->key() == Qt::Key_Up) && event_key->modifiers() ==
+    //                   Qt::NoModifier))
+    //                   {
+    //            if (widget == this->dialog->ui.twitch.channelName) {
+    //                this->dialog->ui.twitch.watching->setFocus();
+    //                return true;
+    //            } else if (widget == this->dialog->ui.twitch.whispers) {
+    //                this->dialog->ui.twitch.channel->setFocus();
+    //                return true;
+    //            }
 
-            widget->previousInFocusChain()->setFocus();
-            return true;
-        } else {
-            return false;
-        }
-        return true;
-    } else if (event->type() == QEvent::KeyRelease) {
-        QKeyEvent *event_key = static_cast<QKeyEvent *>(event);
-        if ((event_key->key() == Qt::Key_Backtab || event_key->key() == Qt::Key_Down) &&
-            event_key->modifiers() == Qt::NoModifier) {
-            return true;
-        }
-    }
+    //            widget->previousInFocusChain()->setFocus();
+    //            return true;
+    //        } else {
+    //            return false;
+    //        }
+    //        return true;
+    //    } else if (event->type() == QEvent::KeyRelease) {
+    //        QKeyEvent *event_key = static_cast<QKeyEvent *>(event);
+    //        if ((event_key->key() == Qt::Key_Backtab || event_key->key() == Qt::Key_Down) &&
+    //            event_key->modifiers() == Qt::NoModifier) {
+    //            return true;
+    //        }
+    //    }
 
     return false;
 }
