@@ -11,7 +11,13 @@ win32 {
     LIBS += -llibssl
     LIBS += -llibcrypto
 } else {
-    PKGCONFIG += openssl
 
-    LIBS += -lssl -lcrypto
+    macx {
+        LIBS += -lssl
+        LIBS += -lcrypto
+    } else {
+        LIBS += -llibssl
+        LIBS += -llibcrypto
+    }
+
 }
